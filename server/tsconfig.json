@@ -1,0 +1,59 @@
+{
+  // Learn more: https://aka.ms/tsconfig
+  "compilerOptions": {
+    /* 🌐 Environment */
+    "target": "ES2022", // Modern JS output (Node 18+ compatible)
+    "module": "NodeNext", // For modern ESM support in Node
+    "moduleResolution": "NodeNext", // Resolves .js/.ts like Node ESM
+    "lib": ["ESNext", "DOM"], // Covers latest JS + browser APIs
+    "types": ["node"], // Enables Node.js types
+
+    /* 📁 Project Structure */
+    "rootDir": "./src", // Source folder
+    "outDir": "./dist", // Compiled output
+    "baseUrl": ".", // Allows absolute imports
+    "paths": {
+      "@/*": ["src/*"] // Optional alias for cleaner imports
+    },
+
+    /* 🧩 Modules & Imports */
+    "esModuleInterop": true, // Makes `import fs from 'fs'` work
+    "allowSyntheticDefaultImports": true, // Helps interop with non-ESM libs
+    "verbatimModuleSyntax": true, // Keeps import/export syntax untouched
+    "isolatedModules": true, // Ensures each file is transpiled safely
+    "resolveJsonModule": true, // Allows importing JSON files directly
+
+    /* ⚙️ Output & Debugging */
+    "sourceMap": true, // Generate .map files for debugging
+    "declaration": true, // Emit .d.ts type declarations
+    "declarationMap": true, // Map .d.ts back to source
+    "removeComments": false, // Keep comments for readability
+
+    /* ✅ Type Safety & Checks */
+    "strict": true, // Enables all strict checks
+    "noImplicitAny": true, // Forbid variables with implicit 'any'
+    "noUncheckedIndexedAccess": true, // Safer array/object indexing
+    "exactOptionalPropertyTypes": true, // Optional props treated strictly
+    "noFallthroughCasesInSwitch": true, // Safer switch statements
+    "forceConsistentCasingInFileNames": true, // Avoid case sensitivity issues
+    "skipLibCheck": true, // Skip 3rd-party .d.ts checks (faster)
+
+    /* ✨ Code Cleanliness */
+    "noImplicitReturns": true, // Warn if function lacks a return
+    "noUnusedLocals": true, // Catch unused vars
+    "noUnusedParameters": true, // Catch unused params
+    "noImplicitOverride": true, // Must use 'override' keyword in subclasses
+    "noPropertyAccessFromIndexSignature": true, // Safer property access
+
+    /* 🚀 Experimental / Advanced */
+    "moduleDetection": "force", // Enforces ESM syntax in all files
+    "noUncheckedSideEffectImports": true, // Warns on side-effect-only imports
+    "useDefineForClassFields": true, // Follows modern JS class semantics
+
+    /* 🧱 Build */
+    "incremental": true, // Speeds up rebuilds
+    "tsBuildInfoFile": "./.tsbuildinfo" // Cache file for incremental builds
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}

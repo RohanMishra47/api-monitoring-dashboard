@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// A monitored API/service
+model Endpoint {
+  id          String   @id @default(uuid())
+  name        String
+  url         String
+  interval    Int      // in seconds
+  thresholdMs Int      // response time threshold
+  createdAt   DateTime @default(now())
+  logs        Log[]
+  alerts      Alert[]
+  billing     Billing[]
+}
+
+// Log entry for each monitoring check
+model Log {
+  id         String   @id @default(uuid())
+  endpointId String
+  statusCode Int
+  latencyMs  Int
+  timestamp  DateTime @default(now())
+  error      String?  // optional error message
+  endpoint   Endpoint @relation(fields: [endpointId], references: [id])
+}
+
+// Alert generated when an endpoint is down or slow
+model Alert {
+  id         String   @id @default(uuid())
+  endpointId String
+  type       String   // "DOWN" or "SLOW"
+  triggeredAt DateTime @default(now())
+  resolvedAt DateTime?
+  endpoint   Endpoint @relation(fields: [endpointId], references: [id])
+}
+
+// Billing record for monitoring costs
+model Billing {
+  id         String   @id @default(uuid())
+  endpointId String
+  cost       Float
+  timestamp  DateTime @default(now())
+  endpoint   Endpoint @relation(fields: [endpointId], references: [id])
+}
