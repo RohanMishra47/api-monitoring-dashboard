@@ -9,7 +9,6 @@
     "types": ["node"], // Enables Node.js types
 
     /* 📁 Project Structure */
-    "rootDir": "./src", // Source folder
     "outDir": "./dist", // Compiled output
     "baseUrl": ".", // Allows absolute imports
     "paths": {
@@ -54,6 +53,6 @@
     "incremental": true, // Speeds up rebuilds
     "tsBuildInfoFile": "./.tsbuildinfo" // Cache file for incremental builds
   },
-  "include": ["src"],
+  "include": ["src", "prisma"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }
