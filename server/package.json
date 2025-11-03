@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --watch src --exec ts-node src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "type-check": "tsc --noEmit",
+    "dev:safe": "pnpm type-check && tsx watch src/index.ts",
     "prisma:generate": "dotenv -e .env -- pnpm prisma generate",
     "prisma:pull": "dotenv -e .env -- pnpm prisma db pull",
     "prisma:migrate": "dotenv -e .env -- pnpm prisma migrate dev"
@@ -31,9 +33,7 @@
     "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.15.6",
     "dotenv-cli": "^11.0.0",
-    "nodemon": "^3.1.10",
     "prisma": "^6.18.0",
-    "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }
