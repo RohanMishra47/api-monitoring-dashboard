@@ -1,6 +1,9 @@
+import endpointRoutes from "@/routes/endpoints.js";
 import type { Request, Response } from "express";
 import express from "express";
 import { startMonitoring } from "./jobs/monitor.js";
+import alertRoutes from "./routes/alerts.js";
+import logRoutes from "./routes/logs.js";
 
 const app = express();
 const PORT = process.env["PORT"] || 5000;
@@ -12,6 +15,9 @@ app.use(express.json());
 app.get("/", (_req: Request, res: Response) => {
   res.send("API Monitoring Backend is running");
 });
+app.use("/endpoints", endpointRoutes);
+app.use("/logs", logRoutes);
+app.use("/alerts", alertRoutes);
 
 // Start Server
 app.listen(PORT, () => {
