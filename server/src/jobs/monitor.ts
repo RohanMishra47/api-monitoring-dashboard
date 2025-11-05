@@ -1,3 +1,4 @@
+import { sendAlertEmail } from "@/utils/email.js";
 import { PrismaClient } from "@prisma/client";
 import axios from "axios";
 import cron from "node-cron";
@@ -54,12 +55,24 @@ export function startMonitoring() {
           },
         });
         console.log(`🚨 New alert created for ${endpoint.name}`);
+
+        await sendAlertEmail(
+          `🚨 Alert: ${endpoint.name} is ${isDown ? "DOWN" : "SLOW"}`,
+          `Endpoint: ${
+            endpoint.url
+          }\nStatus: ${statusCode}\nLatency: ${latencyMs}ms\nTime: ${new Date().toISOString()}`
+        );
       } else if (!hasIssue && existingAlert) {
         await prisma.alert.update({
           where: { id: existingAlert.id },
           data: { resolvedAt: new Date() },
         });
         console.log(`✅ Alert resolved for ${endpoint.name}`);
+
+        await sendAlertEmail(
+          `✅ Recovery: ${endpoint.name} is back online`,
+          `Endpoint: ${endpoint.url}\nRecovered at: ${new Date().toISOString()}`
+        );
       }
     }
 
