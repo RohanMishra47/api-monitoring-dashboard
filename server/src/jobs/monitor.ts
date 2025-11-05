@@ -39,13 +39,27 @@ export function startMonitoring() {
       const isDown = statusCode === 0 || statusCode >= 500;
       const isSlow = latencyMs > endpoint.thresholdMs;
 
-      if (isDown || isSlow) {
+      const hasIssue = isDown || isSlow;
+
+      // Check for existing unresolved alert
+      const existingAlert = await prisma.alert.findFirst({
+        where: { endpointId: endpoint.id, resolvedAt: null },
+      });
+
+      if (hasIssue && !existingAlert) {
         await prisma.alert.create({
           data: {
             endpointId: endpoint.id,
             type: isDown ? "DOWN" : "SLOW",
           },
         });
+        console.log(`🚨 New alert created for ${endpoint.name}`);
+      } else if (!hasIssue && existingAlert) {
+        await prisma.alert.update({
+          where: { id: existingAlert.id },
+          data: { resolvedAt: new Date() },
+        });
+        console.log(`✅ Alert resolved for ${endpoint.name}`);
       }
     }
 

@@ -21,4 +21,20 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.patch("/:id/resolve", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updated = prisma.alert.update({
+      where: { id },
+      data: { resolvedAt: new Date() },
+    });
+
+    return res.json({ updated });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to resolve error" });
+  }
+});
+
 export default router;
