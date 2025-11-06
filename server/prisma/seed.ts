@@ -4,22 +4,10 @@ const prisma = new PrismaClient();
 async function seedEndpoints() {
   const endpoints = [
     {
-      name: "OpenAI API",
-      url: "https://mock.openai.com/v1",
-      interval: 60,
-      thresholdMs: 500,
-    },
-    {
-      name: "Stripe API",
-      url: "https://mock.stripe.com/v1",
+      name: "Google API",
+      url: "https://www.google.com",
       interval: 120,
-      thresholdMs: 300,
-    },
-    {
-      name: "Weather API",
-      url: "https://mock.weather.com/data",
-      interval: 180,
-      thresholdMs: 700,
+      thresholdMs: 500,
     },
   ];
 
