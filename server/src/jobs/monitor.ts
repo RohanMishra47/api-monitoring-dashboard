@@ -5,6 +5,25 @@ import cron from "node-cron";
 
 const prisma = new PrismaClient();
 
+// Function to clean up old logs
+async function cleanupOldLogs() {
+  const retentionDays = 30; // keep logs for 30 days
+  const cutOffDate = new Date();
+  cutOffDate.setDate(cutOffDate.getDate() - retentionDays);
+
+  try {
+    const deleted = await prisma.log.deleteMany({
+      where: { timestamp: { lt: cutOffDate } },
+    });
+
+    console.log(
+      `🧹 Deleted ${deleted.count} old logs older than ${retentionDays} days`
+    );
+  } catch (error) {
+    console.error("Error cleaning up old logs:", error);
+  }
+}
+
 // Function to check/monitor an API endpoint
 export function startMonitoring() {
   // Run every minute
@@ -78,4 +97,13 @@ export function startMonitoring() {
 
     console.log("✅ Monitoring cycle complete");
   });
+
+  // Schedule log cleanup daily at 2 AM
+  cron.schedule("0 2 * * *", async () => {
+    console.log(" 🧹 Starting daily log cleanup");
+    await cleanupOldLogs();
+  });
+
+  console.log("📊 Monitoring started - running every minute");
+  console.log("🧹 Log cleanup scheduled daily at 2 AM");
 }
