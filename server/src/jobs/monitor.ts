@@ -5,6 +5,22 @@ import cron from "node-cron";
 
 const prisma = new PrismaClient();
 
+// Default monitoring interval in seconds
+const DEFAULT_INTERVAL = 5 * 60; // 300 seconds (5 minutes)
+
+function isDueForCheck(endpoint: {
+  lastCheckedAt: Date | null;
+  interval: number;
+}) {
+  const now = Date.now();
+  const lastChecked = endpoint.lastCheckedAt
+    ? endpoint.lastCheckedAt.getTime()
+    : 0;
+  const intervalMs = (endpoint.interval ?? DEFAULT_INTERVAL) * 1000;
+  // If never checked (lastChecked === 0) treat as due.
+  return now - lastChecked >= intervalMs;
+}
+
 // Function to clean up old logs
 async function cleanupOldLogs() {
   const retentionDays = 30; // keep logs for 30 days
@@ -30,7 +46,12 @@ export function startMonitoring() {
   cron.schedule("* * * * *", async () => {
     const endpoints = await prisma.endpoint.findMany();
 
-    for (const endpoint of endpoints) {
+    // Filter endpoints due for check
+    const dueEndpoints = endpoints.filter(isDueForCheck);
+
+    console.log(`⚙️ ${dueEndpoints.length} endpoints due for check`);
+
+    for (const endpoint of dueEndpoints) {
       const start = Date.now();
       let statusCode = 0;
       let error: string | null = null;
@@ -53,6 +74,12 @@ export function startMonitoring() {
           latencyMs,
           error,
         },
+      });
+
+      // Immediately update lastCheckedAt so we don't re-check again until time passes
+      await prisma.endpoint.update({
+        where: { id: endpoint.id },
+        data: { lastCheckedAt: new Date() },
       });
 
       // Trigger alert if needed

@@ -21,6 +21,7 @@ model Endpoint {
   interval    Int      // in seconds
   thresholdMs Int      // response time threshold
   createdAt   DateTime @default(now())
+  lastCheckedAt DateTime? // optional last checked timestamp
   logs        Log[]
   alerts      Alert[]
   billing     Billing[]
