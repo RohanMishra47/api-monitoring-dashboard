@@ -1,3 +1,4 @@
+import { authMiddleware } from "@/middleware/authMiddleware.js";
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 
@@ -5,17 +6,20 @@ const router: ReturnType<typeof Router> = Router();
 const prisma = new PrismaClient();
 
 // Create a new endpoint
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   const { name, url, interval, thresholdMs } = req.body;
+  const userId = req.user?.id; // Extract user ID from the request object
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized. User ID not found." });
+  }
 
   const ALLOWED_MINUTES = [5, 10, 15];
 
   if (!name || !url || interval === undefined || thresholdMs === undefined) {
-    return res
-      .status(400)
-      .json({
-        error: "Missing required fields (name, url, interval, thresholdMs)",
-      });
+    return res.status(400).json({
+      error: "Missing required fields (name, url, interval, thresholdMs)",
+    });
   }
 
   const parsedIntervalMinutes = Number(interval);
@@ -48,13 +52,14 @@ router.post("/", async (req, res) => {
         url,
         interval: intervalSeconds,
         thresholdMs: parsedThresholdMs,
+        userId, // Associate endpoint with the authenticated user
+        lastCheckedAt: new Date(), // Initialize lastCheckedAt to current time
       },
     });
 
     return res.status(201).json(endpoint);
   } catch (err) {
     console.error("Endpoint creation failed:", err);
-    // You might add checks for unique URL constraints here (P2002 error code)
     return res
       .status(500)
       .json({ error: "Failed to create endpoint due to server error." });

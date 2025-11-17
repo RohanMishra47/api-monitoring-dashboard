@@ -18,7 +18,6 @@
     /* 🧩 Modules & Imports */
     "esModuleInterop": true, // Makes `import fs from 'fs'` work
     "allowSyntheticDefaultImports": true, // Helps interop with non-ESM libs
-    "verbatimModuleSyntax": true, // Keeps import/export syntax untouched
     "isolatedModules": true, // Ensures each file is transpiled safely
     "resolveJsonModule": true, // Allows importing JSON files directly
 
@@ -45,14 +44,14 @@
     "noPropertyAccessFromIndexSignature": true, // Safer property access
 
     /* 🚀 Experimental / Advanced */
-    "moduleDetection": "force", // Enforces ESM syntax in all files
-    "noUncheckedSideEffectImports": true, // Warns on side-effect-only imports
+    "moduleDetection": "auto", // Auto-detect module format
+    // "noUncheckedSideEffectImports": true, // Warns on side-effect-only imports
     "useDefineForClassFields": true, // Follows modern JS class semantics
 
     /* 🧱 Build */
     "incremental": true, // Speeds up rebuilds
     "tsBuildInfoFile": "./.tsbuildinfo" // Cache file for incremental builds
   },
-  "include": ["src", "prisma"],
+  "include": ["src/**/*", "prisma/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }
