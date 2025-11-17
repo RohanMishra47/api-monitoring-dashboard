@@ -70,6 +70,11 @@ router.post("/", authMiddleware, async (req, res) => {
 router.patch("/api/endpoints/:id/interval", async (req, res) => {
   const { id } = req.params;
   const { intervalMinutes } = req.body;
+  const userId = req.user?.id; // Extract user ID from the request object
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized. User ID not found." });
+  }
 
   const allowedIntervals = [5, 10, 15];
   // Ensure intervalMinutes is treated as a number.
@@ -87,6 +92,25 @@ router.patch("/api/endpoints/:id/interval", async (req, res) => {
   const intervalSeconds = interval * 60; // e.g., 5 * 60 = 300
 
   try {
+    // Check if the endpoint exists and belongs to the user
+    const endpoint = await prisma.endpoint.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+
+    if (!endpoint) {
+      return res
+        .status(404)
+        .json({ error: `Endpoint with ID ${id} not found.` });
+    }
+
+    if (endpoint.userId !== userId) {
+      return res
+        .status(403)
+        .json({ error: "Forbidden. You do not own this endpoint." });
+    }
+
+    // Update the endpoint's interval if all checks pass
     const updated = await prisma.endpoint.update({
       where: { id },
       data: { interval: intervalSeconds },
@@ -105,4 +129,5 @@ router.patch("/api/endpoints/:id/interval", async (req, res) => {
       .json({ error: "Failed to update endpoint interval." });
   }
 });
+
 export default router;
