@@ -65,7 +65,10 @@ model Billing {
   id         String   @id @default(uuid())
   endpointId String
   userId String?
-  cost       Float
+  billingType String? // "Monitoring Check", "Log Storage", etc.
+  quantity Int? // The number of units consumed
+  unitCost Float? // Cost per unit
+  cost       Float // total cost (quantity * unitCost)
   timestamp  DateTime @default(now())
   endpoint   Endpoint @relation(fields: [endpointId], references: [id])
   user User? @relation(fields: [userId], references: [id])
