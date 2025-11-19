@@ -165,4 +165,51 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
+// Delete an endpoint
+router.delete("/:id", authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user?.id; // From my auth middleware
+
+  if (!id) {
+    return res
+      .status(400)
+      .json({ error: "Endpoint ID is required in the URL parameters." });
+  }
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized. User ID not found." });
+  }
+
+  try {
+    const endpoint = await prisma.endpoint.findUnique({
+      where: { id },
+      select: { id: true, userId: true },
+    });
+
+    if (!endpoint) {
+      return res
+        .status(404)
+        .json({ error: `Endpoint with ID ${id} not found.` });
+    }
+
+    if (endpoint.userId !== userId) {
+      return res
+        .status(403)
+        .json({ error: "you don't permission to delete this endpoint." });
+    }
+
+    await prisma.endpoint.delete({
+      where: { id },
+    });
+
+    return res.status(200).json({
+      message: "Endpoint deleted successfully.",
+      id,
+    });
+  } catch (error) {
+    console.error("Failed to delete endpoint:", error);
+    return res.status(500).json({ error: "Failed to delete endpoint." });
+  }
+});
+
 export default router;
