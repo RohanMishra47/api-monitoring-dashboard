@@ -67,10 +67,16 @@ router.post("/", authMiddleware, async (req, res) => {
 });
 
 // Update endpoint check interval
-router.patch("/api/endpoints/:id/interval", async (req, res) => {
+router.patch("/:id/interval", authMiddleware, async (req, res) => {
   const { id } = req.params;
   const { intervalMinutes } = req.body;
   const userId = req.user?.id; // Extract user ID from the request object
+
+  if (!id) {
+    return res
+      .status(400)
+      .json({ error: "Endpoint ID is required in the URL parameters." });
+  }
 
   if (!userId) {
     return res.status(401).json({ error: "Unauthorized. User ID not found." });
@@ -127,6 +133,35 @@ router.patch("/api/endpoints/:id/interval", async (req, res) => {
     return res
       .status(500)
       .json({ error: "Failed to update endpoint interval." });
+  }
+});
+
+// Get all endpoints for the authenticated user
+router.get("/", authMiddleware, async (req, res) => {
+  const userId = req.user?.id; // Extract user ID from the request object
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized. User ID not found." });
+  }
+
+  try {
+    const endpoints = await prisma.endpoint.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        url: true,
+        interval: true,
+        thresholdMs: true,
+        createdAt: true,
+        lastCheckedAt: true,
+      },
+    });
+    return res.status(200).json({ endpoints });
+  } catch (err) {
+    console.error("Failed to fetch endpoints:", err);
+    return res.status(500).json({ error: "Failed to fetch endpoints." });
   }
 });
 

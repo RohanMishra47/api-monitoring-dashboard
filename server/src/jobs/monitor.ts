@@ -8,6 +8,7 @@ const prisma = new PrismaClient();
 // Default monitoring interval in seconds
 const DEFAULT_INTERVAL = 5 * 60; // 300 seconds (5 minutes)
 
+// Function to determine if an endpoint is due for a check
 function isDueForCheck(endpoint: {
   lastCheckedAt: Date | null;
   interval: number;
