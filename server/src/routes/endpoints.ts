@@ -5,6 +5,24 @@ import { Router } from "express";
 const router: ReturnType<typeof Router> = Router();
 const prisma = new PrismaClient();
 
+// Helper function
+function isValidUrl(string: string | URL) {
+  try {
+    new URL(string);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+// Define the type for allowed updates
+type EndpointUpdates = {
+  name?: string;
+  url?: string;
+  interval?: number;
+  threshold?: number;
+};
+
 // Create a new endpoint
 router.post("/", authMiddleware, async (req, res) => {
   const { name, url, interval, thresholdMs } = req.body;
@@ -66,38 +84,23 @@ router.post("/", authMiddleware, async (req, res) => {
   }
 });
 
-// Update endpoint check interval
-router.patch("/:id/interval", authMiddleware, async (req, res) => {
+// Update endpoint properties
+router.patch("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { intervalMinutes } = req.body;
   const userId = req.user?.id; // Extract user ID from the request object
 
-  if (!id) {
-    return res
-      .status(400)
-      .json({ error: "Endpoint ID is required in the URL parameters." });
-  }
-
-  if (!userId) {
-    return res.status(401).json({ error: "Unauthorized. User ID not found." });
-  }
-
-  const allowedIntervals = [5, 10, 15];
-  // Ensure intervalMinutes is treated as a number.
-  const interval = Number(intervalMinutes ?? 5);
-
-  if (!allowedIntervals.includes(interval)) {
-    return res.status(400).json({
-      error: `Invalid interval. Allowed values are ${allowedIntervals.join(
-        ", "
-      )} minutes.`,
-    });
-  }
-
-  //Conversion to Seconds (Database Requirement)
-  const intervalSeconds = interval * 60; // e.g., 5 * 60 = 300
-
   try {
+    if (!id) {
+      return res
+        .status(400)
+        .json({ error: "Endpoint ID is required in the URL parameters." });
+    }
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ error: "Unauthorized. User ID not found." });
+    }
     // Check if the endpoint exists and belongs to the user
     const endpoint = await prisma.endpoint.findUnique({
       where: { id },
@@ -116,13 +119,56 @@ router.patch("/:id/interval", authMiddleware, async (req, res) => {
         .json({ error: "Forbidden. You do not own this endpoint." });
     }
 
-    // Update the endpoint's interval if all checks pass
-    const updated = await prisma.endpoint.update({
-      where: { id },
-      data: { interval: intervalSeconds },
+    // Define what fields can be updated
+    const allowedFields: (keyof EndpointUpdates)[] = [
+      "name",
+      "url",
+      "interval",
+      "threshold",
+    ];
+
+    const allowedIntervals = [5, 10, 15];
+
+    // extract only allowed field from request body
+    const updates: EndpointUpdates = {};
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        // Using a type assertion to avoid TS error when assigning dynamic keys
+        (updates as any)[field] = req.body[field];
+      }
     });
 
-    return res.status(200).json({ endpoint: updated });
+    // Validate atleast one field is being updated
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "No valid fields to update" });
+    }
+
+    // Field-specific validations
+    if (updates.url && !isValidUrl(updates.url)) {
+      return res.status(400).json({ error: "Invalid URL format" });
+    }
+
+    if (updates.interval && !allowedIntervals.includes(updates.interval)) {
+      return res
+        .status(400)
+        .json({ error: "Interval must be 5, 10, or 15 minutes" });
+    }
+
+    // Convert minutes → seconds
+    if (updates.interval) {
+      updates.interval = updates.interval * 60;
+    }
+
+    // Update the endpoint if all checks pass
+    const updatedEndpoint = await prisma.endpoint.update({
+      where: { id },
+      data: updates,
+    });
+
+    return res.status(200).json({
+      message: "Endpoint updated successfully",
+      endpoint: updatedEndpoint,
+    });
   } catch (error: any) {
     if (error.code === "P2025") {
       return res
@@ -130,9 +176,7 @@ router.patch("/:id/interval", authMiddleware, async (req, res) => {
         .json({ error: `Endpoint with ID ${id} not found.` });
     }
     console.error("Database update failed:", error);
-    return res
-      .status(500)
-      .json({ error: "Failed to update endpoint interval." });
+    return res.status(500).json({ error: "Failed to update endpoint." });
   }
 });
 

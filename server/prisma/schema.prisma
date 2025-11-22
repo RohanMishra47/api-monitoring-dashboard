@@ -19,7 +19,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   endpoints Endpoint[]
-  billing Billing[]
 }
 
 // A monitored API/service
@@ -32,10 +31,9 @@ model Endpoint {
   createdAt   DateTime @default(now())
   lastCheckedAt DateTime? // optional last checked timestamp
   userId String?
-  user User? @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
   logs        Log[]
   alerts      Alert[]
-  billing     Billing[]
 }
 
 // Log entry for each monitoring check
@@ -46,7 +44,7 @@ model Log {
   latencyMs  Int
   timestamp  DateTime @default(now())
   error      String?  // optional error message
-  endpoint   Endpoint @relation(fields: [endpointId], references: [id])
+  endpoint   Endpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
 }
 
 // Alert generated when an endpoint is down or slow
@@ -56,19 +54,5 @@ model Alert {
   type       String   // "DOWN" or "SLOW"
   triggeredAt DateTime @default(now())
   resolvedAt DateTime?
-  endpoint   Endpoint @relation(fields: [endpointId], references: [id])
-}
-
-// Billing record for monitoring costs
-model Billing {
-  id         String   @id @default(uuid())
-  endpointId String
-  userId String?
-  billingType String? // "Monitoring Check", "Log Storage", etc.
-  quantity Int? // The number of units consumed
-  unitCost Float? // Cost per unit
-  cost       Float // total cost (quantity * unitCost)
-  timestamp  DateTime @default(now())
-  endpoint   Endpoint @relation(fields: [endpointId], references: [id])
-  user User? @relation(fields: [userId], references: [id])
+  endpoint   Endpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
 }
