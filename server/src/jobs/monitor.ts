@@ -5,6 +5,7 @@ import cron from "node-cron";
 import { Pool } from "pg";
 import { PrismaClient } from "src/generated/client.js";
 
+// Prisma 7 client setup with PostgreSQL adapter
 const connectionString = process.env["DATABASE_URL"];
 const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
