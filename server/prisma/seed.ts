@@ -1,12 +1,4 @@
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
-import { PrismaClient } from "src/generated/client.js";
-
-// Prisma 7 client setup with PostgreSQL adapter
-const connectionString = process.env["DATABASE_URL"];
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+import prisma from "./prisma_client.js";
 
 async function seedEndpoints() {
   const endpoints = [

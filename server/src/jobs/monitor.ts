@@ -1,15 +1,7 @@
 import { sendAlertEmail } from "@/utils/email.js";
-import { PrismaPg } from "@prisma/adapter-pg";
 import axios from "axios";
 import cron from "node-cron";
-import { Pool } from "pg";
-import { PrismaClient } from "src/generated/client.js";
-
-// Prisma 7 client setup with PostgreSQL adapter
-const connectionString = process.env["DATABASE_URL"];
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+import prisma from "prisma/prisma_client.js";
 
 // Default monitoring interval in seconds
 const DEFAULT_INTERVAL = 5 * 60; // 300 seconds (5 minutes)

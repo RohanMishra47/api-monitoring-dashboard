@@ -1,15 +1,7 @@
-import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { Router } from "express";
 import jwt from "jsonwebtoken";
-import { Pool } from "pg";
-import { PrismaClient } from "src/generated/client.js";
-
-// Prisma 7 client setup with PostgreSQL adapter
-const connectionString = process.env["DATABASE_URL"];
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+import prisma from "prisma/prisma_client.js";
 
 const router: ReturnType<typeof Router> = Router();
 
@@ -46,3 +38,5 @@ router.post("/login", async (req, res) => {
   const token = jwt.sign({ id: user.id }, jwtSecret, { expiresIn: "2h" });
   return res.json({ token });
 });
+
+export default router;

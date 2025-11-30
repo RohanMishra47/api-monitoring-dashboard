@@ -1,4 +1,6 @@
+import authRoutes from "@/routes/auth.js";
 import endpointRoutes from "@/routes/endpoints.js";
+import cors from "cors";
 import type { Request, Response } from "express";
 import express from "express";
 import { startMonitoring } from "./jobs/monitor.js";
@@ -10,6 +12,7 @@ const PORT = process.env["PORT"] || 5000;
 
 // Middleware
 app.use(express.json());
+app.use(cors());
 
 // Routes
 app.get("/", (_req: Request, res: Response) => {
@@ -18,6 +21,7 @@ app.get("/", (_req: Request, res: Response) => {
 app.use("/endpoints", endpointRoutes);
 app.use("/logs", logRoutes);
 app.use("/alerts", alertRoutes);
+app.use("/auth", authRoutes);
 
 // Start Server
 app.listen(PORT, () => {
