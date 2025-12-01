@@ -31,7 +31,7 @@ router.post("/", authMiddleware, async (req, res) => {
     return res.status(401).json({ error: "Unauthorized. User ID not found." });
   }
 
-  const ALLOWED_MINUTES = [5, 10, 15];
+  const ALLOWED_MINUTES = [1, 5, 10, 15];
 
   if (!name || !url || interval === undefined || thresholdMs === undefined) {
     return res.status(400).json({
