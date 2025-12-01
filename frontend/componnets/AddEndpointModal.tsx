@@ -73,7 +73,7 @@ const AddEndpointModal = ({
               type="text"
               required
               placeholder="Production API"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
@@ -89,7 +89,7 @@ const AddEndpointModal = ({
               type="url"
               required
               placeholder="https://api.example.com"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
               value={formData.url}
               onChange={(e) =>
                 setFormData({ ...formData, url: e.target.value })
@@ -102,7 +102,7 @@ const AddEndpointModal = ({
               Check Interval (seconds)
             </label>
             <select
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
               value={formData.interval}
               onChange={(e) =>
                 setFormData({ ...formData, interval: Number(e.target.value) })
@@ -124,7 +124,7 @@ const AddEndpointModal = ({
               required
               min={100}
               placeholder="2000"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
               value={formData.thresholdMs}
               onChange={(e) =>
                 setFormData({
