@@ -4,6 +4,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { API_URL } from "../dashboard/page";
 
 const RegisterPage = () => {
   const router = useRouter();
@@ -21,10 +22,7 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/auth/register",
-        formData
-      );
+      const res = await axios.post(`${API_URL}/auth/register`, formData);
       const data = res.data;
 
       if (res.status < 200 || res.status >= 300) {

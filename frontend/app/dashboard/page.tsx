@@ -14,7 +14,15 @@ type Endpoint = {
   createdAt: string;
   lastCheckedAt: string | null;
   userId: string | null;
+  latestLog?: {
+    statusCode: number;
+    latencyMs: number;
+    timestamp: string;
+    error: string | null;
+  };
 };
+
+export const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -27,7 +35,7 @@ const DashboardPage = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.get("http://localhost:5000/endpoints", {
+      const response = await axios.get(`${API_URL}/endpoints`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -35,9 +43,34 @@ const DashboardPage = () => {
 
       const data = response.data;
 
+      const endpointsWithLogs = await Promise.all(
+        data.endpoints.map(async (ep: Endpoint) => {
+          const token = localStorage.getItem("token");
+
+          try {
+            const logResponse = await axios.get(
+              `${API_URL}/endpoints/${ep.id}/logs`,
+              {
+                params: { limit: 1 },
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+
+            const logData = logResponse.data;
+
+            return {
+              ...ep,
+              latestLog: logData.logs?.[0] || null,
+            };
+          } catch {
+            return ep;
+          }
+        })
+      );
+
       console.log("Fetched endpoints:", data);
 
-      setEndpoints(data.endpoints || data);
+      setEndpoints(endpointsWithLogs);
       setLoading(false);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
@@ -70,7 +103,7 @@ const DashboardPage = () => {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.delete(`http://localhost:5000/endpoints/${endpointId}`, {
+      await axios.delete(`${API_URL}/endpoints/${endpointId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -91,6 +124,53 @@ const DashboardPage = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     router.push("/login");
+  };
+
+  const getStatusDisplay = (endpoint: Endpoint) => {
+    if (!endpoint.latestLog) {
+      return {
+        text: "Pending",
+        className: "bg-gray-100 text-gray-600",
+        icon: "⏳",
+      };
+    }
+
+    const { statusCode, error } = endpoint.latestLog;
+
+    if (error || statusCode === 0 || statusCode >= 500) {
+      return {
+        text: "Down",
+        className: "bg-red-100 text-red-800",
+        icon: "🔴",
+      };
+    }
+
+    if (statusCode >= 200 && statusCode < 300) {
+      return {
+        text: "Up",
+        className: "bg-green-100 text-green-800",
+        icon: "🟢",
+      };
+    }
+
+    return {
+      text: `${statusCode}`,
+      className: "bg-yellow-100 text-yellow-800",
+      icon: "⚠️",
+    };
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return date.toLocaleDateString();
   };
 
   if (loading) {
@@ -158,10 +238,10 @@ const DashboardPage = () => {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Interval
+                    Response Time
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Threshold
+                    Last Checked
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                     Actions
@@ -169,35 +249,44 @@ const DashboardPage = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {endpoints.map((endpoint) => (
-                  <tr key={endpoint.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {endpoint.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {endpoint.url}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
-                        Unknown
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {endpoint.interval}s
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {endpoint.thresholdMs}ms
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      <button
-                        onClick={() => handleDelete(endpoint.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {endpoints.map((endpoint) => {
+                  const status = getStatusDisplay(endpoint);
+                  return (
+                    <tr key={endpoint.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {endpoint.name}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                        {endpoint.url}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${status.className}`}
+                        >
+                          {status.icon} {status.text}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {endpoint.latestLog
+                          ? `${endpoint.latestLog.latencyMs}ms`
+                          : "-"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {endpoint.lastCheckedAt
+                          ? formatTimestamp(endpoint.lastCheckedAt)
+                          : "Never"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                        <button
+                          onClick={() => handleDelete(endpoint.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

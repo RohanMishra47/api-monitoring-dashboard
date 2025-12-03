@@ -4,6 +4,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { API_URL } from "../dashboard/page";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -20,10 +21,7 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/auth/login",
-        formData
-      );
+      const res = await axios.post(`${API_URL}/auth/login`, formData);
       const data = res.data;
 
       if (res.status !== 200) {

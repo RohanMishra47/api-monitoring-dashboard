@@ -208,6 +208,60 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
+// Logs for a specific endpoint
+router.get("/:id/logs", authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user?.id; // From my auth middleware
+  const limit = parseInt(req.query["limit"] as string) || 10;
+
+  if (!id) {
+    return res
+      .status(400)
+      .json({ error: "Endpoint ID is required in the URL parameters." });
+  }
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized. User ID not found." });
+  }
+
+  try {
+    const endpoint = await prisma.endpoint.findUnique({
+      where: { id },
+      select: { id: true, userId: true },
+    });
+
+    if (!endpoint) {
+      return res
+        .status(404)
+        .json({ error: `Endpoint with ID ${id} not found.` });
+    }
+
+    if (endpoint.userId !== userId) {
+      return res
+        .status(403)
+        .json({ error: "you don't permission to view this endpoint logs." });
+    }
+
+    const logs = await prisma.log.findMany({
+      where: { endpointId: id },
+      orderBy: { timestamp: "desc" },
+      take: limit,
+      select: {
+        id: true,
+        statusCode: true,
+        latencyMs: true,
+        timestamp: true,
+        error: true,
+      },
+    });
+
+    return res.status(200).json({ logs });
+  } catch (error) {
+    console.error("Failed to fetch logs:", error);
+    return res.status(500).json({ error: "Failed to fetch logs." });
+  }
+});
+
 // Delete an endpoint
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;

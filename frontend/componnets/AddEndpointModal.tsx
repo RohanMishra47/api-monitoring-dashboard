@@ -1,3 +1,4 @@
+import { API_URL } from "@/app/dashboard/page";
 import axios from "axios";
 import { useState } from "react";
 
@@ -25,7 +26,7 @@ const AddEndpointModal = ({
     try {
       const token = localStorage.getItem("token");
 
-      await axios.post("http://localhost:5000/endpoints", formData, {
+      await axios.post(`${API_URL}/endpoints`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
