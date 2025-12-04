@@ -1,6 +1,7 @@
 "use client";
 
 import AddEndpointModal from "@/componnets/AddEndpointModal";
+import EndpointChart from "@/componnets/EndpointChart";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -30,6 +31,10 @@ const DashboardPage = () => {
   const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [error, setError] = useState("");
+  const [selectedEndpoint, setSelectedEndpoint] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const fetchEndpoints = async () => {
     try {
@@ -276,13 +281,26 @@ const DashboardPage = () => {
                           ? formatTimestamp(endpoint.lastCheckedAt)
                           : "Never"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        <button
-                          onClick={() => handleDelete(endpoint.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() =>
+                              setSelectedEndpoint({
+                                id: endpoint.id,
+                                name: endpoint.name,
+                              })
+                            }
+                            className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded"
+                          >
+                            View Chart
+                          </button>
+                          <button
+                            onClick={() => handleDelete(endpoint.id)}
+                            className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -293,7 +311,6 @@ const DashboardPage = () => {
         )}
       </main>
 
-      {/* Add Endpoint Modal */}
       {showAddModal && (
         <AddEndpointModal
           onClose={() => setShowAddModal(false)}
@@ -301,6 +318,14 @@ const DashboardPage = () => {
             setShowAddModal(false);
             fetchEndpoints();
           }}
+        />
+      )}
+
+      {selectedEndpoint && (
+        <EndpointChart
+          endpointId={selectedEndpoint.id}
+          endpointName={selectedEndpoint.name}
+          onClose={() => setSelectedEndpoint(null)}
         />
       )}
     </div>

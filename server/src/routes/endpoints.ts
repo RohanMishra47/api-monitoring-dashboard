@@ -213,6 +213,7 @@ router.get("/:id/logs", authMiddleware, async (req, res) => {
   const { id } = req.params;
   const userId = req.user?.id; // From my auth middleware
   const limit = parseInt(req.query["limit"] as string) || 10;
+  const hours = parseInt(req.query["hours"] as string) || 24;
 
   if (!id) {
     return res
@@ -242,9 +243,16 @@ router.get("/:id/logs", authMiddleware, async (req, res) => {
         .json({ error: "you don't permission to view this endpoint logs." });
     }
 
+    // Get logs from last X hours
+    const since = new Date();
+    since.setHours(since.getHours() - hours);
+
     const logs = await prisma.log.findMany({
-      where: { endpointId: id },
-      orderBy: { timestamp: "desc" },
+      where: {
+        endpointId: id,
+        timestamp: { gte: since },
+      },
+      orderBy: { timestamp: "asc" }, // Ascending for charts
       take: limit,
       select: {
         id: true,
