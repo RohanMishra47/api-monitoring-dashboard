@@ -23,6 +23,11 @@ app.use("/logs", logRoutes);
 app.use("/alerts", alertRoutes);
 app.use("/auth", authRoutes);
 
+// Health Check Endpoint
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok", timestamp: new Date() });
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`✅ Server listening on port ${PORT}`);
