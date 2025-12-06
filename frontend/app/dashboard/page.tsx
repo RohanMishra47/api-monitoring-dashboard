@@ -35,8 +35,12 @@ const DashboardPage = () => {
     id: string;
     name: string;
   } | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchEndpoints = async () => {
+    setIsRefreshing(true);
     try {
       const token = localStorage.getItem("token");
 
@@ -76,6 +80,7 @@ const DashboardPage = () => {
       console.log("Fetched endpoints:", data);
 
       setEndpoints(endpointsWithLogs);
+      setLastUpdated(new Date());
       setLoading(false);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
@@ -85,6 +90,8 @@ const DashboardPage = () => {
       } else {
         setError("An unknown error occurred");
       }
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -96,6 +103,11 @@ const DashboardPage = () => {
         router.push("/login");
       } else {
         fetchEndpoints();
+        // Auto-refresh every 30 seconds
+        const interval = setInterval(() => {
+          fetchEndpoints();
+        }, 30000);
+        return () => clearInterval(interval);
       }
     };
 
@@ -105,6 +117,7 @@ const DashboardPage = () => {
   const handleDelete = async (endpointId: string) => {
     if (!confirm("Are you sure you want to delete this endpoint?")) return;
 
+    setDeletingId(endpointId);
     try {
       const token = localStorage.getItem("token");
 
@@ -123,6 +136,8 @@ const DashboardPage = () => {
       }
 
       alert(errorMessage);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -178,6 +193,15 @@ const DashboardPage = () => {
     return date.toLocaleDateString();
   };
 
+  const getTimeSinceUpdate = () => {
+    const now = new Date();
+    const diffSeconds = Math.floor(
+      (now.getTime() - lastUpdated.getTime()) / 1000
+    );
+    if (diffSeconds < 10) return "Just now";
+    return `${diffSeconds}s ago`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -204,13 +228,28 @@ const DashboardPage = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">My Endpoints</h2>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            + Add Endpoint
-          </button>
+          <div>
+            <h2 className="text-2xl font-bold">My Endpoints</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Last updated {getTimeSinceUpdate()} • Auto-refreshes every 30s
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => fetchEndpoints()}
+              disabled={loading || isRefreshing}
+              className={`px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all`}
+            >
+              <span className={isRefreshing ? "animate-spin" : ""}>🔄</span>
+              {isRefreshing ? "Refreshing..." : "Refresh"}
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              + Add Endpoint
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -296,9 +335,12 @@ const DashboardPage = () => {
                           </button>
                           <button
                             onClick={() => handleDelete(endpoint.id)}
-                            className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded"
+                            disabled={deletingId === endpoint.id}
+                            className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
                           >
-                            Delete
+                            {deletingId === endpoint.id
+                              ? "Deleting..."
+                              : "Delete"}
                           </button>
                         </div>
                       </td>
