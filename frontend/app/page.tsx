@@ -2,21 +2,23 @@ import Link from "next/link";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-indigo-100 text-gray-900">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-900">Endpoint Monitor</h1>
+      <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-extrabold tracking-tight text-indigo-700">
+            Endpoint Monitor
+          </h1>
           <div className="flex gap-3">
             <Link
               href="/login"
-              className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
+              className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition rounded-md"
             >
               Login
             </Link>
             <Link
               href="/register"
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700 transition"
             >
               Get Started
             </Link>
@@ -25,25 +27,29 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Monitor Your APIs with Confidence
+      <main className="max-w-7xl mx-auto px-6 py-24">
+        <div className="text-center mb-20">
+          <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
+            Monitor Your APIs with{" "}
+            <span className="bg-linear-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
+              Confidence
+            </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Track endpoint uptime, response times, and get instant alerts when
-            something goes wrong. Simple, powerful, and built for developers.
+          <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+            Track uptime, analyze performance, and receive instant alerts.
+            Simple, reliable, and built for developers who care about stability.
           </p>
-          <div className="flex gap-4 justify-center">
+
+          <div className="flex gap-5 justify-center">
             <Link
               href="/register"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-lg font-medium"
+              className="px-8 py-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-lg hover:shadow-xl transition text-lg font-semibold"
             >
               Start Monitoring Free
             </Link>
             <Link
               href="/login"
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-lg font-medium"
+              className="px-8 py-4 border border-gray-300 text-gray-700 rounded-xl hover:bg-white hover:shadow-md transition text-lg font-semibold"
             >
               Sign In
             </Link>
@@ -51,76 +57,76 @@ export default function LandingPage() {
         </div>
 
         {/* Features */}
-        <div className="grid md:grid-cols-3 gap-8 mt-20">
-          <div className="bg-white rounded-lg p-6 shadow-md">
-            <div className="text-3xl mb-4">📊</div>
-            <h3 className="text-xl font-bold mb-2">Real-Time Monitoring</h3>
-            <p className="text-gray-600">
-              Continuously check your endpoints and track response times with
-              detailed charts and analytics.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 shadow-md">
-            <div className="text-3xl mb-4">🚨</div>
-            <h3 className="text-xl font-bold mb-2">Instant Alerts</h3>
-            <p className="text-gray-600">
-              Get notified immediately when your endpoints go down or response
-              times exceed thresholds.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 shadow-md">
-            <div className="text-3xl mb-4">📈</div>
-            <h3 className="text-xl font-bold mb-2">Performance Insights</h3>
-            <p className="text-gray-600">
-              Visualize trends, identify patterns, and optimize your API
-              performance over time.
-            </p>
-          </div>
+        <div className="grid md:grid-cols-3 gap-10 mt-20">
+          {[
+            {
+              icon: "📊",
+              title: "Real-Time Monitoring",
+              desc: "Track endpoint response times and uptime with live analytics.",
+            },
+            {
+              icon: "🚨",
+              title: "Instant Alerts",
+              desc: "Get notified immediately when your API behaves unexpectedly.",
+            },
+            {
+              icon: "📈",
+              title: "Performance Insights",
+              desc: "Analyze trends and optimize your API with rich visual reports.",
+            },
+          ].map((item) => (
+            <div
+              key={item.title}
+              className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition border border-gray-100"
+            >
+              <div className="text-4xl mb-4">{item.icon}</div>
+              <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
+              <p className="text-gray-600 leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
         </div>
 
         {/* How It Works */}
-        <div className="mt-20 text-center">
-          <h2 className="text-3xl font-bold mb-12">How It Works</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <div className="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                1
+        <div className="mt-28 text-center">
+          <h2 className="text-4xl font-extrabold mb-14">How It Works</h2>
+          <div className="grid md:grid-cols-3 gap-12">
+            {[
+              {
+                step: 1,
+                title: "Add Your Endpoints",
+                desc: "Enter your API URLs and set monitoring intervals.",
+              },
+              {
+                step: 2,
+                title: "We Monitor 24/7",
+                desc: "Automated checks run continuously in the background.",
+              },
+              {
+                step: 3,
+                title: "Get Insights",
+                desc: "View charts, receive alerts, and track performance.",
+              },
+            ].map((item) => (
+              <div key={item.step}>
+                <div className="bg-indigo-600 text-white w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4 shadow-md">
+                  {item.step}
+                </div>
+                <h3 className="font-bold text-xl mb-2">{item.title}</h3>
+                <p className="text-gray-600">{item.desc}</p>
               </div>
-              <h3 className="font-bold mb-2">Add Your Endpoints</h3>
-              <p className="text-gray-600">
-                Enter your API URLs and set monitoring intervals
-              </p>
-            </div>
-
-            <div>
-              <div className="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                2
-              </div>
-              <h3 className="font-bold mb-2">We Monitor 24/7</h3>
-              <p className="text-gray-600">
-                Automated checks run continuously in the background
-              </p>
-            </div>
-
-            <div>
-              <div className="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                3
-              </div>
-              <h3 className="font-bold mb-2">Get Insights</h3>
-              <p className="text-gray-600">
-                View charts, receive alerts, and track performance
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t mt-20">
-        <div className="max-w-7xl mx-auto px-4 py-8 text-center text-gray-600">
-          <p>Built with Next.js, Express.js, and PostgreSQL</p>
+      <footer className="bg-white border-t mt-24">
+        <div className="max-w-7xl mx-auto px-6 py-8 text-center text-gray-600">
+          <p className="text-sm">
+            Built with <span className="font-medium">Next.js</span>,{" "}
+            <span className="font-medium">Express.js</span>, and{" "}
+            <span className="font-medium">PostgreSQL</span>
+          </p>
         </div>
       </footer>
     </div>

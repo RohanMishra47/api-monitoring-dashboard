@@ -31,7 +31,7 @@ type Props = {
 const EndpointChart = ({ endpointId, endpointName, onClose }: Props) => {
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState(24); // default to last 24 hours
+  const [timeRange, setTimeRange] = useState(24);
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -48,10 +48,7 @@ const EndpointChart = ({ endpointId, endpointName, onClose }: Props) => {
         setLogs(response.data.logs || []);
       } catch (err) {
         if (axios.isAxiosError(err)) {
-          console.error(
-            "Failed to fetch logs:",
-            err.response?.data?.error || err.message
-          );
+          console.error("Failed to fetch logs:", err.response?.data?.error);
         } else {
           console.error("Unexpected error:", err);
         }
@@ -69,22 +66,19 @@ const EndpointChart = ({ endpointId, endpointName, onClose }: Props) => {
       minute: "2-digit",
     }),
     responseTime: log.latencyMs,
-    status: log.statusCode,
     isDown: log.error || log.statusCode === 0 || log.statusCode >= 500,
   }));
 
-  const avgResponseTime =
+  const avgResponse =
     logs.length > 0
-      ? Math.round(
-          logs.reduce((sum, log) => sum + log.latencyMs, 0) / logs.length
-        )
+      ? Math.round(logs.reduce((a, b) => a + b.latencyMs, 0) / logs.length)
       : 0;
 
-  const maxResponseTime =
-    logs.length > 0 ? Math.max(...logs.map((log) => log.latencyMs)) : 0;
+  const minResponse =
+    logs.length > 0 ? Math.min(...logs.map((l) => l.latencyMs)) : 0;
 
-  const minResponseTime =
-    logs.length > 0 ? Math.min(...logs.map((log) => log.latencyMs)) : 0;
+  const maxResponse =
+    logs.length > 0 ? Math.max(...logs.map((l) => l.latencyMs)) : 0;
 
   const uptime =
     logs.length > 0
@@ -98,112 +92,129 @@ const EndpointChart = ({ endpointId, endpointName, onClose }: Props) => {
       : 0;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+      <div className="bg-white/90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-2xl font-bold">{endpointName}</h2>
-            <p className="text-sm text-gray-500">Response time over time</p>
+            <h2 className="text-3xl font-extrabold bg-linear-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+              {endpointName}
+            </h2>
+            <p className="text-sm text-gray-500">Response time analysis</p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl"
+            className="text-gray-400 hover:text-gray-600 text-3xl transition"
           >
             ✕
           </button>
         </div>
 
-        {/* Time Range Selector */}
-        <div className="flex gap-2 mb-6">
-          {[1, 6, 12, 24].map((hours) => (
+        {/* TIME RANGE BUTTONS */}
+        <div className="flex gap-3 mb-8">
+          {[1, 6, 12, 24].map((h) => (
             <button
-              key={hours}
-              onClick={() => setTimeRange(hours)}
-              className={`px-3 py-1 rounded text-sm ${
-                timeRange === hours
-                  ? "bg-blue-600 text-white"
+              key={h}
+              onClick={() => setTimeRange(h)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm ${
+                timeRange === h
+                  ? "bg-indigo-600 text-white shadow-md"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              {hours}h
+              {h}h
             </button>
           ))}
         </div>
 
+        {/* LOADING OR EMPTY */}
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="text-gray-500">Loading chart data...</div>
+            <div className="text-gray-600 text-lg">Loading chart...</div>
           </div>
         ) : logs.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <div className="text-center text-gray-500">
-              <p className="mb-2">No data available yet</p>
+              <p className="font-medium">No data available</p>
               <p className="text-sm">
-                Endpoint hasn&apos;t been checked in the last {timeRange} hours
+                This endpoint has no checks in the last {timeRange} hours.
               </p>
             </div>
           </div>
         ) : (
           <>
-            {/* Stats Cards */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              <div className="bg-blue-50 rounded-lg p-4">
-                <p className="text-xs text-blue-600 uppercase mb-1">Average</p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {avgResponseTime}ms
+            {/* STAT CARDS */}
+            <div className="grid grid-cols-4 gap-4 mb-10">
+              <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                <p className="text-xs uppercase text-indigo-600 font-medium">
+                  Average
+                </p>
+                <p className="text-2xl font-extrabold text-indigo-900">
+                  {avgResponse}ms
                 </p>
               </div>
-              <div className="bg-green-50 rounded-lg p-4">
-                <p className="text-xs text-green-600 uppercase mb-1">Min</p>
-                <p className="text-2xl font-bold text-green-900">
-                  {minResponseTime}ms
+
+              <div className="bg-green-50 border border-green-100 rounded-xl p-4">
+                <p className="text-xs uppercase text-green-600 font-medium">
+                  Min
+                </p>
+                <p className="text-2xl font-extrabold text-green-900">
+                  {minResponse}ms
                 </p>
               </div>
-              <div className="bg-orange-50 rounded-lg p-4">
-                <p className="text-xs text-orange-600 uppercase mb-1">Max</p>
-                <p className="text-2xl font-bold text-orange-900">
-                  {maxResponseTime}ms
+
+              <div className="bg-orange-50 border border-orange-100 rounded-xl p-4">
+                <p className="text-xs uppercase text-orange-600 font-medium">
+                  Max
+                </p>
+                <p className="text-2xl font-extrabold text-orange-900">
+                  {maxResponse}ms
                 </p>
               </div>
-              <div className="bg-purple-50 rounded-lg p-4">
-                <p className="text-xs text-purple-600 uppercase mb-1">Uptime</p>
-                <p className="text-2xl font-bold text-purple-900">{uptime}%</p>
+
+              <div className="bg-purple-50 border border-purple-100 rounded-xl p-4">
+                <p className="text-xs uppercase text-purple-600 font-medium">
+                  Uptime
+                </p>
+                <p className="text-2xl font-extrabold text-purple-900">
+                  {uptime}%
+                </p>
               </div>
             </div>
 
-            {/* Chart */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <ResponsiveContainer width="100%" height={300}>
+            {/* CHART */}
+            <div className="bg-white border border-gray-200 rounded-xl shadow p-6 mb-8">
+              <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                  <XAxis dataKey="time" stroke="#666" tick={{ fontSize: 12 }} />
+                  <CartesianGrid strokeDasharray="4 4" stroke="#e4e4e4" />
+
+                  <XAxis dataKey="time" stroke="#555" tick={{ fontSize: 12 }} />
+
                   <YAxis
-                    stroke="#666"
+                    stroke="#555"
                     tick={{ fontSize: 12 }}
                     label={{
-                      value: "Response Time (ms)",
+                      value: "ms",
                       angle: -90,
                       position: "insideLeft",
+                      style: { fill: "#555" },
                     }}
                   />
+
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #ccc",
-                      borderRadius: "4px",
-                      padding: "8px",
-                    }}
-                    formatter={(value: number, name: string) => {
-                      if (name === "responseTime")
-                        return [`${value}ms`, "Response Time"];
-                      return [value, name];
+                      backgroundColor: "white",
+                      borderRadius: "8px",
+                      border: "1px solid #ddd",
+                      padding: "10px",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                     }}
                   />
+
                   <Line
                     type="monotone"
                     dataKey="responseTime"
-                    stroke="#2563eb"
+                    stroke="#4f46e5"
                     strokeWidth={2}
                     dot={(props: DotItemDotProps) => {
                       const { cx, cy, payload } = props;
@@ -211,8 +222,8 @@ const EndpointChart = ({ endpointId, endpointName, onClose }: Props) => {
                         <circle
                           cx={cx}
                           cy={cy}
-                          r={4}
-                          fill={payload.isDown ? "#ef4444" : "#2563eb"}
+                          r={5}
+                          fill={payload.isDown ? "#dc2626" : "#4f46e5"}
                           stroke="#fff"
                           strokeWidth={2}
                         />
@@ -223,23 +234,24 @@ const EndpointChart = ({ endpointId, endpointName, onClose }: Props) => {
               </ResponsiveContainer>
             </div>
 
-            {/* Recent Checks */}
-            <div className="mt-6">
+            {/* RECENT CHECKS */}
+            <div>
               <h3 className="text-sm font-semibold text-gray-700 mb-3">
                 Recent Checks
               </h3>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
+
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                 {logs
                   .slice(-10)
                   .reverse()
                   .map((log) => (
                     <div
                       key={log.id}
-                      className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm"
+                      className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg shadow-sm text-sm"
                     >
                       <div className="flex items-center gap-3">
                         <span
-                          className={`w-2 h-2 rounded-full ${
+                          className={`w-3 h-3 rounded-full ${
                             log.error ||
                             log.statusCode === 0 ||
                             log.statusCode >= 500
@@ -251,15 +263,19 @@ const EndpointChart = ({ endpointId, endpointName, onClose }: Props) => {
                           {new Date(log.timestamp).toLocaleString()}
                         </span>
                       </div>
+
                       <div className="flex items-center gap-4">
-                        <span className="text-gray-700">{log.latencyMs}ms</span>
+                        <span className="font-medium text-gray-700">
+                          {log.latencyMs}ms
+                        </span>
+
                         <span
-                          className={`px-2 py-1 rounded text-xs ${
+                          className={`px-2 py-1 rounded-md text-xs font-medium ${
                             log.error ||
                             log.statusCode === 0 ||
                             log.statusCode >= 500
-                              ? "bg-red-100 text-red-800"
-                              : "bg-green-100 text-green-800"
+                              ? "bg-red-100 text-red-800 border border-red-200"
+                              : "bg-green-100 text-green-800 border border-green-200"
                           }`}
                         >
                           {log.error ? "Error" : log.statusCode}

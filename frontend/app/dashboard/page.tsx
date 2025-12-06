@@ -45,18 +45,15 @@ const DashboardPage = () => {
       const token = localStorage.getItem("token");
 
       const response = await axios.get(`${API_URL}/endpoints`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = response.data;
 
       const endpointsWithLogs = await Promise.all(
         data.endpoints.map(async (ep: Endpoint) => {
-          const token = localStorage.getItem("token");
-
           try {
+            const token = localStorage.getItem("token");
             const logResponse = await axios.get(
               `${API_URL}/endpoints/${ep.id}/logs`,
               {
@@ -77,8 +74,6 @@ const DashboardPage = () => {
         })
       );
 
-      console.log("Fetched endpoints:", data);
-
       setEndpoints(endpointsWithLogs);
       setLastUpdated(new Date());
       setLoading(false);
@@ -96,17 +91,17 @@ const DashboardPage = () => {
   };
 
   useEffect(() => {
-    // Check if user is authenticated
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
         router.push("/login");
       } else {
         fetchEndpoints();
-        // Auto-refresh every 30 seconds
+
         const interval = setInterval(() => {
           fetchEndpoints();
         }, 30000);
+
         return () => clearInterval(interval);
       }
     };
@@ -122,19 +117,15 @@ const DashboardPage = () => {
       const token = localStorage.getItem("token");
 
       await axios.delete(`${API_URL}/endpoints/${endpointId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       setEndpoints(endpoints.filter((ep) => ep.id !== endpointId));
     } catch (err) {
       let errorMessage = "Failed to delete endpoint";
-
       if (axios.isAxiosError(err)) {
         errorMessage = err.response?.data?.error || errorMessage;
       }
-
       alert(errorMessage);
     } finally {
       setDeletingId(null);
@@ -150,7 +141,7 @@ const DashboardPage = () => {
     if (!endpoint.latestLog) {
       return {
         text: "Pending",
-        className: "bg-gray-100 text-gray-600",
+        className: " bg-gray-100 text-gray-700 border border-gray-200",
         icon: "⏳",
       };
     }
@@ -160,7 +151,7 @@ const DashboardPage = () => {
     if (error || statusCode === 0 || statusCode >= 500) {
       return {
         text: "Down",
-        className: "bg-red-100 text-red-800",
+        className: "bg-red-100 text-red-700 border border-red-200",
         icon: "🔴",
       };
     }
@@ -168,14 +159,14 @@ const DashboardPage = () => {
     if (statusCode >= 200 && statusCode < 300) {
       return {
         text: "Up",
-        className: "bg-green-100 text-green-800",
+        className: "bg-green-100 text-green-700 border border-green-200",
         icon: "🟢",
       };
     }
 
     return {
       text: `${statusCode}`,
-      className: "bg-yellow-100 text-yellow-800",
+      className: "bg-yellow-100 text-yellow-700 border border-yellow-300",
       icon: "⚠️",
     };
   };
@@ -204,124 +195,142 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-indigo-50 via-blue-50 to-indigo-100">
+        <div className="text-gray-600 text-lg font-medium">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-blue-50 to-indigo-100">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold">Endpoint Monitor</h1>
+      <nav className="bg-white/80 backdrop-blur-md border-b shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <h1 className="text-xl font-extrabold text-indigo-700 tracking-tight">
+            Endpoint Monitor
+          </h1>
+
           <button
             onClick={handleLogout}
-            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
+            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition"
           >
             Logout
           </button>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
+      {/* Main */}
+      <main className="max-w-7xl mx-auto px-6 py-10">
+        <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-2xl font-bold">My Endpoints</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Last updated {getTimeSinceUpdate()} • Auto-refreshes every 30s
+            <h2 className="text-3xl font-extrabold text-gray-900">
+              Your Endpoints
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Last updated{" "}
+              <span className="font-medium">{getTimeSinceUpdate()}</span> •
+              Auto-refresh every 30s
             </p>
           </div>
+
           <div className="flex gap-3">
             <button
               onClick={() => fetchEndpoints()}
-              disabled={loading || isRefreshing}
-              className={`px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all`}
+              disabled={isRefreshing}
+              className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm transition"
             >
               <span className={isRefreshing ? "animate-spin" : ""}>🔄</span>
               {isRefreshing ? "Refreshing..." : "Refresh"}
             </button>
+
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition"
             >
               + Add Endpoint
             </button>
           </div>
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded mb-4">{error}</div>
+          <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg mb-4 shadow-sm">
+            {error}
+          </div>
         )}
 
-        {/* Endpoints Table */}
+        {/* Table */}
         {endpoints.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <p className="text-gray-500 mb-4">No endpoints yet</p>
+          <div className="bg-white/90 backdrop-blur rounded-2xl shadow-md p-12 text-center border border-gray-100">
+            <p className="text-gray-500 mb-4 text-lg">No endpoints yet</p>
             <button
               onClick={() => setShowAddModal(true)}
-              className="text-blue-600 hover:underline"
+              className="text-indigo-600 font-medium hover:underline"
             >
               Add your first endpoint
             </button>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200 text-sm">
+              <thead className="bg-gray-50/80">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    URL
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Response Time
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Last Checked
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                    Actions
-                  </th>
+                  {[
+                    "Name",
+                    "URL",
+                    "Status",
+                    "Latency",
+                    "Last Checked",
+                    "Actions",
+                  ].map((header) => (
+                    <th
+                      key={header}
+                      className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                    >
+                      {header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
+
               <tbody className="bg-white divide-y divide-gray-200">
                 {endpoints.map((endpoint) => {
                   const status = getStatusDisplay(endpoint);
                   return (
-                    <tr key={endpoint.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <tr
+                      key={endpoint.id}
+                      className="hover:bg-gray-50/50 transition"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
                         {endpoint.name}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+
+                      <td className="px-6 py-4 text-gray-600 max-w-xs truncate">
                         {endpoint.url}
                       </td>
+
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 py-1 text-xs rounded-full ${status.className}`}
+                          className={`px-3 py-1 text-xs rounded-full border ${status.className}`}
                         >
                           {status.icon} {status.text}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+
+                      <td className="px-6 py-4 text-gray-600">
                         {endpoint.latestLog
                           ? `${endpoint.latestLog.latencyMs}ms`
                           : "-"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+
+                      <td className="px-6 py-4 text-gray-600">
                         {endpoint.lastCheckedAt
                           ? formatTimestamp(endpoint.lastCheckedAt)
                           : "Never"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center gap-2">
+
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
                           <button
                             onClick={() =>
                               setSelectedEndpoint({
@@ -329,14 +338,15 @@ const DashboardPage = () => {
                                 name: endpoint.name,
                               })
                             }
-                            className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded"
+                            className="px-3 py-1 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
                           >
                             View Chart
                           </button>
+
                           <button
                             onClick={() => handleDelete(endpoint.id)}
                             disabled={deletingId === endpoint.id}
-                            className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
+                            className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
                           >
                             {deletingId === endpoint.id
                               ? "Deleting..."
@@ -353,6 +363,7 @@ const DashboardPage = () => {
         )}
       </main>
 
+      {/* Modals */}
       {showAddModal && (
         <AddEndpointModal
           onClose={() => setShowAddModal(false)}
