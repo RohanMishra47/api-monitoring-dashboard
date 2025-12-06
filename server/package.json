@@ -10,7 +10,8 @@
     "dev:safe": "pnpm type-check && tsx watch src/index.ts",
     "prisma:generate": "dotenv -e .env -- pnpm prisma generate",
     "prisma:pull": "dotenv -e .env -- pnpm prisma db pull",
-    "prisma:migrate": "dotenv -e .env -- pnpm prisma migrate dev"
+    "prisma:migrate": "dotenv -e .env -- pnpm prisma migrate dev",
+    "prisma:migrate-deploy": "dotenv -e .env -- pnpm prisma migrate deploy"
   },
   "keywords": [],
   "author": "",
