@@ -1,6 +1,6 @@
+import prisma from "@/config/prisma_client.js";
 import { authMiddleware } from "@/middleware/authMiddleware.js";
 import { Router } from "express";
-import prisma from "prisma/prisma_client.js";
 
 const router: ReturnType<typeof Router> = Router();
 

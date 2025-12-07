@@ -1,7 +1,7 @@
+import prisma from "@/config/prisma_client.js";
 import bcrypt from "bcryptjs";
 import { Router } from "express";
 import jwt from "jsonwebtoken";
-import prisma from "prisma/prisma_client.js";
 
 const router: ReturnType<typeof Router> = Router();
 

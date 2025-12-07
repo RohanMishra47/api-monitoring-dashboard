@@ -1,7 +1,7 @@
+import prisma from "@/config/prisma_client.js";
 import { sendAlertEmail } from "@/utils/email.js";
 import axios from "axios";
 import cron from "node-cron";
-import prisma from "prisma/prisma_client.js";
 
 // Default monitoring interval in seconds
 const DEFAULT_INTERVAL = 5 * 60; // 300 seconds (5 minutes)
