@@ -11,7 +11,7 @@ async function seedEndpoints() {
   ];
 
   for (const ep of endpoints) {
-    await prisma.Endpoint.create({ data: ep });
+    await prisma.endpoint.create({ data: ep });
   }
 
   console.log("Seeded mock endpoints.");
