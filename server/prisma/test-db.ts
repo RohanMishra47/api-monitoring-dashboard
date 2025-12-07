@@ -1,5 +1,5 @@
-import prisma from "@/config/prisma_client.js";
 import "dotenv/config";
+import prisma from "../src/config/prisma_client";
 
 async function fixEndpoints() {
   try {

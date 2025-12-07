@@ -1,7 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 import pg from "pg";
-import { PrismaClient } from "src/generated/client.js";
+import { PrismaClient } from "../generated/client.js";
 
 // Prisma 7 client setup with PostgreSQL adapter
 const pool = new pg.Pool({

@@ -1,4 +1,4 @@
-import prisma from "@/config/prisma_client.js";
+import prisma from "../src/config/prisma_client";
 
 async function seedEndpoints() {
   const endpoints = [
@@ -11,7 +11,7 @@ async function seedEndpoints() {
   ];
 
   for (const ep of endpoints) {
-    await prisma.endpoint.create({ data: ep });
+    await prisma.Endpoint.create({ data: ep });
   }
 
   console.log("Seeded mock endpoints.");
