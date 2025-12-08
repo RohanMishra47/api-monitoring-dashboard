@@ -42,6 +42,9 @@ pnpm-lock.yaml
 **/.env
 **/.env.*
 !**/.env.example
+.env*.local
+.env.local
+**/.env*.local
 
 # ======================================
 # 🧪 Tests

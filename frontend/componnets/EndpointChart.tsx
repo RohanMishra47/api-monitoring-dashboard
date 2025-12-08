@@ -1,6 +1,6 @@
 "use client";
 
-import { API_URL } from "@/app/dashboard/page";
+import { API_URL } from "@/utils/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import {

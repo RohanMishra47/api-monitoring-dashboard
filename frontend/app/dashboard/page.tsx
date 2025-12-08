@@ -2,6 +2,7 @@
 
 import AddEndpointModal from "@/componnets/AddEndpointModal";
 import EndpointChart from "@/componnets/EndpointChart";
+import { API_URL } from "@/utils/api";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -22,8 +23,6 @@ type Endpoint = {
     error: string | null;
   };
 };
-
-export const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const DashboardPage = () => {
   const router = useRouter();

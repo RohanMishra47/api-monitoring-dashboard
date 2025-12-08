@@ -1,4 +1,4 @@
-import { API_URL } from "@/app/dashboard/page";
+import { API_URL } from "@/utils/api";
 import axios from "axios";
 import { useState } from "react";
 

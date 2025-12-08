@@ -1,10 +1,10 @@
 "use client";
 
+import { API_URL } from "@/utils/api";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { API_URL } from "../dashboard/page";
 
 const LoginPage = () => {
   const router = useRouter();
