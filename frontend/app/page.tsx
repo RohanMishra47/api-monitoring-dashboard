@@ -43,10 +43,25 @@ export default function LandingPage() {
           <div className="flex gap-5 justify-center">
             <Link
               href="/register"
-              className="px-8 py-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-lg hover:shadow-xl transition text-lg font-semibold"
+              className="relative overflow-hidden px-8 py-4 bg-indigo-600 text-white rounded-xl shadow-lg transition text-lg font-semibold
+             before:absolute before:inset-0 before:bg-indigo-700 before:scale-x-0 before:origin-center
+             before:transition-transform before:duration-300 hover:before:scale-x-100"
             >
-              Start Monitoring Free
+              <span className="relative z-10">Start Monitoring Free</span>
             </Link>
+
+            <Link
+              href="/login?demo=true"
+              className="relative overflow-hidden px-8 py-4 border-2 border-indigo-600 text-indigo-600 rounded-xl text-lg font-semibold
+             transition-all duration-300 ease-out
+             before:absolute before:inset-0 before:bg-indigo-600
+             before:scale-x-0 before:origin-center
+             before:transition-transform before:duration-300
+             hover:before:scale-x-100 hover:text-white"
+            >
+              <span className="relative z-10">Try Demo Account</span>
+            </Link>
+
             <Link
               href="/login"
               className="px-8 py-4 border border-gray-300 text-gray-700 rounded-xl hover:bg-white hover:shadow-md transition text-lg font-semibold"

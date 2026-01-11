@@ -3,17 +3,29 @@
 import { API_URL } from "@/utils/api";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const LoginPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Automatically fill credentials if demo mode is active
+  useEffect(() => {
+    const isDemo = searchParams.get("demo");
+    if (isDemo === "true") {
+      setFormData({
+        email: "rohan@example.com",
+        password: "muin006j",
+      });
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +58,12 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-indigo-50 via-blue-50 to-indigo-100 px-4">
       <div className="max-w-md w-full bg-white/80 backdrop-blur-lg border border-gray-100 rounded-2xl shadow-xl p-10">
+        {searchParams.get("demo") === "true" && (
+          <div className="bg-indigo-50 border border-indigo-200 text-indigo-700 p-3 rounded-lg mb-4 text-sm shadow-sm text-center">
+            Demo account credentials pre-filled. Click Login to explore!
+          </div>
+        )}
+
         <h1 className="text-3xl font-extrabold text-center mb-6 bg-linear-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
           Welcome Back
         </h1>
@@ -97,6 +115,23 @@ const LoginPage = () => {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
+
+          <div className="relative flex items-center py-2">
+            <div className="grow border-t border-gray-200"></div>
+            <span className="shrink mx-4 text-gray-400 text-xs uppercase tracking-widest">
+              Or
+            </span>
+            <div className="grow border-t border-gray-200"></div>
+          </div>
+
+          <Link
+            href="/login?demo=true"
+            className="block w-full text-center px-4 py-3 rounded-lg font-bold text-white transition-all duration-500
+                       bg-linear-to-r from-indigo-600 via-indigo-500 to-indigo-500
+                       bg-200% bg-right hover:bg-left shadow-md"
+          >
+            🚀 Explore with Demo Account
+          </Link>
         </form>
 
         <p className="mt-5 text-center text-sm text-gray-600">

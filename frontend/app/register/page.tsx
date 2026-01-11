@@ -114,6 +114,18 @@ const RegisterPage = () => {
           >
             {loading ? "Creating account..." : "Sign Up"}
           </button>
+
+          <p className="text-center text-gray-500 text-sm mb-4">
+            Want to skip the setup and see the dashboard?
+          </p>
+          <Link
+            href="/login?demo=true"
+            className="block w-full text-center px-4 py-3 rounded-lg font-bold text-white transition-all duration-500
+               bg-linear-to-r from-indigo-600 via-indigo-500 to-indigo-500
+               bg-200% bg-right hover:bg-left shadow-md"
+          >
+            ✨ View Sample Dashboard
+          </Link>
         </form>
 
         <p className="mt-5 text-center text-sm text-gray-600">
