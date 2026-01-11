@@ -27,6 +27,13 @@ const LoginForm = () => {
     }
   }, [searchParams]);
 
+  const handleAutoFill = () => {
+    setFormData({
+      email: "rohan@example.com",
+      password: "muin006j",
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -124,14 +131,14 @@ const LoginForm = () => {
             <div className="grow border-t border-gray-200"></div>
           </div>
 
-          <Link
-            href="/login?demo=true"
+          <button
+            onClick={handleAutoFill}
             className="block w-full text-center px-4 py-3 rounded-lg font-bold text-white transition-all duration-500
                        bg-linear-to-r from-indigo-600 via-indigo-500 to-indigo-500
                        bg-200% bg-right hover:bg-left shadow-md"
           >
             🚀 Explore with Demo Account
-          </Link>
+          </button>
         </form>
 
         <p className="mt-5 text-center text-sm text-gray-600">
